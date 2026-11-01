@@ -1,5 +1,6 @@
-import BookCard from "@/components/BookCard";
+import BookCard from "@/components/shared/BookCard";
 import { animate} from "motion"
+import Link from "next/link";
 
 const books = [
   {
@@ -51,12 +52,12 @@ export default function NewArrivals() {
           ))}
         </div>
         <div className="mt-10 flex justify-center">
-          <button
+          <Link href={'/books'}
             type="button"
             className="btn btn-sm border-none bg-[#12392f] px-6 text-white hover:bg-[#0d2b24]"
           >
             See All Books
-          </button>
+          </Link>
         </div>
       </div>
     </section>

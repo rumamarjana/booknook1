@@ -2,7 +2,7 @@ import Image from "next/image";
 
 const links = [
   { label: "Home", href: "/", active: true },
-  { label: "All Books", href: "/all-books", active: false },
+  { label: "All Books", href: "/books", active: false },
   { label: "Add Book", href: "/add-book", active: false },
   { label: "My Books", href: "/my-books", active: false },
   { label: "My Borrows", href: "/my-borrows", active: false },
