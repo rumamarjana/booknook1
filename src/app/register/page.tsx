@@ -3,6 +3,7 @@
 
  import { redirect } from "next/navigation"
  import { authClient } from "../lib/auth-client";
+import Link from "next/link";
 
 
 
@@ -131,7 +132,7 @@ const RegisterPage = () => {
                     </button>
                     <p className="text-center text-sm mt-3">
                         Already have an account?{" "}
-                        <a className="link link-primary">Login</a>
+                       <Link href="/login"className="link link-primary">Login</Link>
                     </p>
                 </div>
             </form>
