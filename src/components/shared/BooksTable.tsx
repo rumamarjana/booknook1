@@ -1,5 +1,6 @@
 import Link from "next/link";
 import EditButtonPage from "./books/EditBooksbutton";
+import DeletedBooksbuttonPage from "./books/deletedBooksbutton";
 type Book = {
   _id: string;
   title?: string;
@@ -169,12 +170,8 @@ async function BooksTableContent() {
                   <div className="flex justify-end gap-2">
                     
                      <EditButtonPage book={book}/>
-                    <Link
-                      href={`/books/${book._id}`}
-                      className="btn btn-sm border-red-200 bg-red-50 text-red-500 hover:border-red-300 hover:bg-red-100 hover:text-red-600"
-                    >
-                      Delete
-                    </Link>
+                    
+                    <DeletedBooksbuttonPage book={book}/>
                   </div>
                 </td>
               </tr>

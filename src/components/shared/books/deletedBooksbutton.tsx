@@ -1,0 +1,89 @@
+
+"use client";
+
+import { useRef } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+
+type Book = {
+  _id: string;
+  title?: string;
+};
+
+const DeletedBooksbuttonPage = ({ book }: { book: Book }) => {
+  const modalRef = useRef<HTMLDialogElement>(null);
+  const router = useRouter();
+
+  // Open Modal
+  const openModal = () => {
+    modalRef.current?.showModal();
+  };
+
+  // Delete Book
+  const handleDeleteBooks = async () => {
+    const res = await fetch(
+      `http://localhost:8000/book/${book._id}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    if (res.ok) {
+      modalRef.current?.close();
+      toast.success(
+        `"${book.title?.trim() || "Book"}" has been deleted successfully. 🗑️`,
+      );
+      router.refresh();
+    } else {
+      toast.error("Something went wrong while deleting the book. Please try again.");
+    }
+  };
+
+  return (
+    <>
+      <button
+        onClick={openModal}
+        className="btn btn-sm btn-error"
+      >
+        Delete
+      </button>
+
+      <dialog ref={modalRef} className="modal">
+        <div className="modal-box max-w-sm">
+
+          <h3 className="text-lg font-bold">
+            ⚠️ Delete Book?
+          </h3>
+
+          <p className="py-4 text-sm">
+            Are you sure you want to remove
+            <span className="font-semibold">
+              {" "}{book.title}
+            </span>
+            ?
+          </p>
+
+          <div className="modal-action">
+
+            <button
+              onClick={() => modalRef.current?.close()}
+              className="btn btn-sm"
+            >
+              Cancel
+            </button>
+
+            <button
+              onClick={handleDeleteBooks}
+              className="btn btn-sm btn-error"
+            >
+              Yes, Delete
+            </button>
+
+          </div>
+        </div>
+      </dialog>
+    </>
+  );
+};
+
+export default DeletedBooksbuttonPage;

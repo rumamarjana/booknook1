@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { ChangeEvent, FormEvent } from "react";
+import { toast } from "react-toastify";
 
 type FormState = {
   title: string;
@@ -42,10 +44,11 @@ const CATEGORIES = [
   "Technology",
 ];
 
-/** localStorage key so future pages (e.g. My Books / All Books) can read saved books */
+
 const BOOKS_STORAGE_KEY = "booknook:books";
 
 export default function AddBookForm() {
+  const router = useRouter();
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState<Status | null>(null);
@@ -84,73 +87,10 @@ export default function AddBookForm() {
       return;
     }
 
-    // const { title, author, category, description, userName, userEmail } = form;
-
-    // const trimmed = {
-    //   title: title.trim(),
-    //   author: author.trim(),
-    //   category,
-    //   totalCopies: form.totalCopies.trim(),
-    //   description: description.trim(),
-    //   userName: userName.trim(),
-    //   userEmail: userEmail.trim(),
-    // };
-
-    // Validate empty fields
-    // if (Object.values(trimmed).some((value) => value === "")) {
-    //   setStatus({
-    //     type: "error",
-    //     message: "Please fill in every field.",
-    //   });
-    //   return;
-    // }
-
-    // // Validate copies
-    // const copies = Number(trimmed.totalCopies);
-
-    // if (!Number.isInteger(copies) || copies < 1) {
-    //   setStatus({
-    //     type: "error",
-    //     message: "Total Copies must be a whole number of at least 1.",
-    //   });
-    //   return;
-    // }
-
-    // Validate image
-    // if (!file) {
-    //   setStatus({
-    //     type: "error",
-    //     message: "Please select a book cover image.",
-    //   });
-    //   return;
-    // }
-
-    // Validate email
-    // if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed.userEmail)) {
-    //   setStatus({
-    //     type: "error",
-    //     message: "Please enter a valid email address.",
-    //   });
-    //   return;
-    // }
-
-    // setSubmitting(true);
-
-    // try {
-    //   // Upload image
-    //   const cover = await uploadCover(file, trimmed.title);
-
-    //   // Create book object
-    //   const book = {
-    //     ...trimmed,
-    //     totalCopies: copies,
-    //     cover,
-    //     createdAt: new Date().toISOString(),
-    //   };
-
-    // setSubmitting(true);
-
-    // Send data to Express API
+   
+    
+  
+   
     setSubmitting(true);
     try {
       const res = await fetch("http://localhost:8000/add-book", {
@@ -168,6 +108,10 @@ export default function AddBookForm() {
         type: "success",
         message: `"${form.title.trim() || "Book"}" has been added to your bookshelf.`,
       });
+      toast.success(
+        `"${form.title.trim() || "Book"}" has been added to your bookshelf. ✅`,
+      );
+      router.push("/");
     } catch {
       setStatus({
         type: "error",
@@ -178,22 +122,7 @@ export default function AddBookForm() {
     }
   };
 
-  // resetForm();
-
-  // setStatus({
-  //   type: "success",
-  //   message: `"${book.title}" has been added to your bookshelf.`,
-  // });
-
-  // } catch (error) {
-  // setStatus({
-  // type: "error",
-  // message: "Something went wrong while adding the book. Please try again.",
-  // });
-  // } finally {
-  // setSubmitting(false);
-  // }
-  // };
+  
   return (
     <form onSubmit={handleSubmit} noValidate>
       <h1 className="text-lg font-bold text-slate-900">Add a New Book</h1>
