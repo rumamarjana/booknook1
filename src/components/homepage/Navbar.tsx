@@ -130,10 +130,10 @@ export default function Navbar() {
                 Login
               </a>
               <a
-                href="/signup"
+                href="/register"
                 className="btn btn-sm gap-2 border-none bg-emerald-600 text-white hover:bg-emerald-700"
               >
-                Signup
+                Register
               </a>
             </div>
           )}
