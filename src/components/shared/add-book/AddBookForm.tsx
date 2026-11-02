@@ -61,137 +61,139 @@ export default function AddBookForm() {
   //   clearFile();
   // }
 
-const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-  const photo = form.photo.trim();
+    const photo = form.photo.trim();
+    const copies = Number(form.totalCopies);
 
-  // Validate image URL
-  if (photo === "") {
-    setStatus({
-      type: "error",
-      message: "Please enter a book image URL.",
-    });
-    return;
-  }
+    // Validate image URL
+    if (photo === "") {
+      setStatus({
+        type: "error",
+        message: "Please enter a book image URL.",
+      });
+      return;
+    }
 
-  if (!/^https?:\/\/\S+$/i.test(photo)) {
-    setStatus({
-      type: "error",
-      message: "Book Image URL must be a valid link starting with http:// or https://.",
-    });
-    return;
-  }
+    if (!/^https?:\/\/\S+$/i.test(photo)) {
+      setStatus({
+        type: "error",
+        message: "Book Image URL must be a valid link starting with http:// or https://.",
+      });
+      return;
+    }
 
-  // const { title, author, category, description, userName, userEmail } = form;
+    // const { title, author, category, description, userName, userEmail } = form;
 
-  // const trimmed = {
-  //   title: title.trim(),
-  //   author: author.trim(),
-  //   category,
-  //   totalCopies: form.totalCopies.trim(),
-  //   description: description.trim(),
-  //   userName: userName.trim(),
-  //   userEmail: userEmail.trim(),
-  // };
+    // const trimmed = {
+    //   title: title.trim(),
+    //   author: author.trim(),
+    //   category,
+    //   totalCopies: form.totalCopies.trim(),
+    //   description: description.trim(),
+    //   userName: userName.trim(),
+    //   userEmail: userEmail.trim(),
+    // };
 
-  // Validate empty fields
-  // if (Object.values(trimmed).some((value) => value === "")) {
-  //   setStatus({
-  //     type: "error",
-  //     message: "Please fill in every field.",
-  //   });
-  //   return;
-  // }
+    // Validate empty fields
+    // if (Object.values(trimmed).some((value) => value === "")) {
+    //   setStatus({
+    //     type: "error",
+    //     message: "Please fill in every field.",
+    //   });
+    //   return;
+    // }
 
-  // // Validate copies
-  // const copies = Number(trimmed.totalCopies);
+    // // Validate copies
+    // const copies = Number(trimmed.totalCopies);
 
-  // if (!Number.isInteger(copies) || copies < 1) {
-  //   setStatus({
-  //     type: "error",
-  //     message: "Total Copies must be a whole number of at least 1.",
-  //   });
-  //   return;
-  // }
+    // if (!Number.isInteger(copies) || copies < 1) {
+    //   setStatus({
+    //     type: "error",
+    //     message: "Total Copies must be a whole number of at least 1.",
+    //   });
+    //   return;
+    // }
 
-  // Validate image
-  // if (!file) {
-  //   setStatus({
-  //     type: "error",
-  //     message: "Please select a book cover image.",
-  //   });
-  //   return;
-  // }
+    // Validate image
+    // if (!file) {
+    //   setStatus({
+    //     type: "error",
+    //     message: "Please select a book cover image.",
+    //   });
+    //   return;
+    // }
 
-  // Validate email
-  // if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed.userEmail)) {
-  //   setStatus({
-  //     type: "error",
-  //     message: "Please enter a valid email address.",
-  //   });
-  //   return;
-  // }
+    // Validate email
+    // if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed.userEmail)) {
+    //   setStatus({
+    //     type: "error",
+    //     message: "Please enter a valid email address.",
+    //   });
+    //   return;
+    // }
 
-  // setSubmitting(true);
+    // setSubmitting(true);
 
-  // try {
-  //   // Upload image
-  //   const cover = await uploadCover(file, trimmed.title);
+    // try {
+    //   // Upload image
+    //   const cover = await uploadCover(file, trimmed.title);
 
-  //   // Create book object
-  //   const book = {
-  //     ...trimmed,
-  //     totalCopies: copies,
-  //     cover,
-  //     createdAt: new Date().toISOString(),
-  //   };
+    //   // Create book object
+    //   const book = {
+    //     ...trimmed,
+    //     totalCopies: copies,
+    //     cover,
+    //     createdAt: new Date().toISOString(),
+    //   };
 
-  // setSubmitting(true);
+    // setSubmitting(true);
 
-  // Send data to Express API
-  setSubmitting(true);
-  try {
-    const res = await fetch("http://localhost:8000/add-book", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ ...form }),
-    });
-    const data = await res.json();
-    console.log(data);
+    // Send data to Express API
+    setSubmitting(true);
+    try {
+      const res = await fetch("http://localhost:8000/add-book", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({...form,
+            totalCopies: copies,}),
+      });
+      const data = await res.json();
+      console.log(data);
 
-    setStatus({
-      type: "success",
-      message: `"${form.title.trim() || "Book"}" has been added to your bookshelf.`,
-    });
-  } catch {
-    setStatus({
-      type: "error",
-      message: "Something went wrong while adding the book. Please try again.",
-    });
-  } finally {
-    setSubmitting(false);
-  }
-};
+      setStatus({
+        type: "success",
+        message: `"${form.title.trim() || "Book"}" has been added to your bookshelf.`,
+      });
+    } catch {
+      setStatus({
+        type: "error",
+        message: "Something went wrong while adding the book. Please try again.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-    // resetForm();
+  // resetForm();
 
-    // setStatus({
-    //   type: "success",
-    //   message: `"${book.title}" has been added to your bookshelf.`,
-    // });
+  // setStatus({
+  //   type: "success",
+  //   message: `"${book.title}" has been added to your bookshelf.`,
+  // });
 
   // } catch (error) {
-    // setStatus({
-      // type: "error",
-      // message: "Something went wrong while adding the book. Please try again.",
-    // });
+  // setStatus({
+  // type: "error",
+  // message: "Something went wrong while adding the book. Please try again.",
+  // });
   // } finally {
-    // setSubmitting(false);
+  // setSubmitting(false);
   // }
-// };
+  // };
   return (
     <form onSubmit={handleSubmit} noValidate>
       <h1 className="text-lg font-bold text-slate-900">Add a New Book</h1>
@@ -247,19 +249,23 @@ const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         </div>
 
         <div>
-          <label htmlFor="totalCopies" className="mb-1 block text-xs font-semibold text-slate-700">
+          <label
+            htmlFor="totalCopies"
+            className="mb-1 block text-xs font-semibold text-slate-700"
+          >
             Total Copies
           </label>
+
           <input
             id="totalCopies"
             name="totalCopies"
             type="number"
-            min={1}
-            step={1}
-            placeholder="Total Copies"
+            min="1"
+            required
+            placeholder="Enter total copies"
             value={form.totalCopies}
             onChange={onInputChange}
-            className="input input-sm w-full rounded-lg border-slate-200 bg-white text-sm placeholder-slate-400 focus:border-emerald-600 focus:outline-none"
+            className="input input-sm w-full rounded-lg border-slate-200 bg-white text-sm"
           />
         </div>
 
@@ -291,7 +297,7 @@ const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
             onChange={onInputChange}
             className="input input-sm w-full rounded-lg border-slate-200 bg-white text-sm placeholder-slate-400 focus:border-emerald-600 focus:outline-none"
           />
-         
+
         </div>
 
         <div>
@@ -325,7 +331,7 @@ const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         </div>
       </div>
 
-     
+
       <button
         type="submit"
         disabled={submitting}

@@ -55,6 +55,10 @@ function LogoutIcon() {
 }
 
 export default function Navbar() {
+  // Flip this to true (once real login/session state exists) to show the
+  // avatar + profile dropdown instead of the Login / Signup links.
+  const isLoggedIn = false;
+
   return (
     <header className="relative z-20 bg-white">
       <nav className="navbar mx-auto max-w-7xl px-4">
@@ -87,33 +91,52 @@ export default function Navbar() {
         </div>
 
         <div className="navbar-end">
-          <details className="dropdown dropdown-end">
-            <summary className="btn btn-circle btn-ghost list-none [&::-webkit-details-marker]:hidden">
-              <div className="avatar">
-                <div className="w-10 overflow-hidden rounded-full ring-1 ring-slate-200">
-                  <Image
-                    src="https://randomuser.me/api/portraits/women/44.jpg"
-                    alt="User avatar"
-                    width={40}
-                    height={40}
-                    className="object-cover"
-                  />
+          {isLoggedIn ? (
+            <details className="dropdown dropdown-end">
+              <summary className="btn btn-circle btn-ghost list-none [&::-webkit-details-marker]:hidden">
+                <div className="avatar">
+                  <div className="w-10 overflow-hidden rounded-full ring-1 ring-slate-200">
+                    <Image
+                      src="https://randomuser.me/api/portraits/women/44.jpg"
+                      alt="User avatar"
+                      width={40}
+                      height={40}
+                      className="object-cover"
+                    />
+                  </div>
                 </div>
-              </div>
-            </summary>
-            <ul className="menu dropdown-content z-50 mt-2 w-44 rounded-box bg-white p-2 text-slate-700 shadow-md">
-              <li>
-                <a href="/profile" className="gap-2">
-                  <UserIcon /> My Profile
-                </a>
-              </li>
-              <li>
-                <a href="/logout" className="gap-2">
-                  <LogoutIcon /> Logout
-                </a>
-              </li>
-            </ul>
-          </details>
+              </summary>
+              <ul className="menu dropdown-content z-50 mt-2 w-44 rounded-box bg-white p-2 text-slate-700 shadow-md">
+                <li>
+                  <a href="/profile" className="gap-2">
+                    <UserIcon /> My Profile
+                  </a>
+                </li>
+                <li>
+                  <a href="/logout" className="gap-2">
+                    <LogoutIcon /> Logout
+                  </a>
+                </li>
+              </ul>
+            </details>
+          ) : (
+            // Logged out: plain navbar links, no dropdown
+            <div className="flex items-center gap-2">
+              <a
+                href="/login"
+                className="btn btn-ghost btn-sm gap-2 text-slate-700 hover:bg-slate-100 hover:text-emerald-700"
+              >
+                <UserIcon />
+                Login
+              </a>
+              <a
+                href="/signup"
+                className="btn btn-sm gap-2 border-none bg-emerald-600 text-white hover:bg-emerald-700"
+              >
+                Signup
+              </a>
+            </div>
+          )}
         </div>
       </nav>
     </header>

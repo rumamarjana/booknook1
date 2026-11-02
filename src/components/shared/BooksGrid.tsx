@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 type Book = {
   _id: string;
   title?: string;
@@ -102,13 +104,13 @@ async function BooksGridContent() {
                 {book.category.trim()}
               </span>
             )}
-            <button
-              type="button"
+            <Link
+              href={`/books/${book._id}`}
               className="btn btn-xs mt-2 flex w-full items-center gap-1 border-none bg-[#12392f] text-white hover:bg-[#0d2b24]"
             >
               <ViewDetailsIcon />
               View Details
-            </button>
+            </Link>
           </div>
         );
       })}
