@@ -1,32 +1,49 @@
-import React from 'react';
+"use client";
 
-const returnbook = () => {
-    const handleReturn = async (id) => {
-        const res = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/my-borrows/return/${id}`,
-            {
-                method: "PATCH",
-            }
-        );
+import { authClient } from "@/app/lib/auth-client";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
-        const data = await res.json();
-
-        if (res.ok) {
-            toast.success(data.message);
-            router.refresh();
-        } else {
-            toast.error(data.message);
-        }
-    };
-    return (
-        <button
-            onClick={() => handleReturn(borrow._id)}
-            disabled={borrow.status === "returned"}
-            className="btn btn-success btn-sm"
-        >
-            {borrow.status === "returned" ? "Returned" : "Return Book"}
-        </button>
-    );
+type ReturnBookProps = {
+  id: string;
 };
 
-export default returnbook;
+const ReturnBook = ({ id }: ReturnBookProps) => {
+  const router = useRouter();
+
+  const handleReturn = async () => {
+    try {
+      const session = await authClient.getSession();
+
+      const token = session.data?.session?.token;
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/borrows/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (res.ok) {
+        toast.success("Book returned successfully!");
+        router.refresh();
+      } else {
+        toast.error("Failed to return book!");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong!");
+    }
+  };
+
+  return (
+    <button onClick={handleReturn}>
+      Return Book
+    </button>
+  );
+};
+
+export default ReturnBook;
