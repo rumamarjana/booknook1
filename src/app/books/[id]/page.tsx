@@ -165,9 +165,11 @@ async function BookDetails({ params }: Props) {
               _id: book._id,
               title: book.title?.trim() || "Untitled Book",
               photo: book.photo ?? "",
+              totalCopies: totalCopies,
             }}
             available={totalCopies > 0}
           />
+
           {totalCopies <= 0 && (
             <span className="badge badge-error badge-outline">
               Not Available

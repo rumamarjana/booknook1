@@ -10,6 +10,7 @@ type BorrowSectionProps = {
     _id: string;
     title: string;
     photo: string;
+    totalCopies: number;
   };
   available: boolean;
 };
@@ -18,12 +19,12 @@ const BorrowSection = ({ book, available }: BorrowSectionProps) => {
   const { data: session, isPending } = authClient.useSession();
   const user = session?.user;
 
-  // Wait for the session to resolve before showing anything actionable
+  // Wait for session
   if (isPending) {
     return <div className="skeleton btn h-9 w-40" />;
   }
 
-  // Not logged in → send them to login first
+  // Not logged in
   if (!user) {
     return (
       <div className="flex flex-wrap items-center gap-3">
@@ -33,6 +34,7 @@ const BorrowSection = ({ book, available }: BorrowSectionProps) => {
         >
           Log in to Borrow
         </Link>
+
         <span className="text-xs text-slate-500">
           You need an account to borrow books.
         </span>
@@ -40,8 +42,8 @@ const BorrowSection = ({ book, available }: BorrowSectionProps) => {
     );
   }
 
-  // No copies left on the shelf
-  if (!available) {
+  // No copies available
+  if (!available || book.totalCopies <= 0) {
     return (
       <button
         type="button"
@@ -53,7 +55,7 @@ const BorrowSection = ({ book, available }: BorrowSectionProps) => {
     );
   }
 
-  // Logged in + copies available → open the borrow modal
+  // Logged in + copies available
   return (
     <BorrowButton
       book={book}

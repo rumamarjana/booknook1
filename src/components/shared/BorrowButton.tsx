@@ -8,6 +8,7 @@ type Book = {
   _id: string;
   title: string;
   photo: string;
+  totalCopies: number;
 };
 
 type BorrowModalProps = {
@@ -24,26 +25,29 @@ const BorrowButton = ({ book, user }: BorrowModalProps) => {
   const [loading, setLoading] = useState(false);
 
   const openModal = () => {
+    if (book.totalCopies <= 0) {
+      toast.error("Book is not available!");
+      return;
+    }
+
     modalRef.current?.showModal();
   };
 
   const handleBorrow = async () => {
+    if (loading) return;
+
     const borrowData = {
       bookId: book._id,
       bookTitle: book.title,
       bookImage: book.photo,
       userName: user.name,
       userEmail: user.email,
-      borrowDate: new Date().toISOString(),
-      returnDate: new Date(
-        Date.now() + 14 * 24 * 60 * 60 * 1000
-      ).toISOString(),
     };
 
     try {
       setLoading(true);
 
-      const response = await fetch("http://localhost:8000/borrow", {
+      const response = await fetch("http://localhost:8000/borrows", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -59,13 +63,14 @@ const BorrowButton = ({ book, user }: BorrowModalProps) => {
       }
 
       modalRef.current?.close();
-      // Copies count is server-rendered — refresh so the $inc shows up
-      router.refresh();
+
       toast.success(
-        `"${book.title.trim() || "Book"}" has been borrowed successfully. 📚`,
+        `"${book.title}" has been borrowed successfully! 📚`
       );
+
+      router.refresh();
     } catch (error) {
-      console.error(error);
+      console.error("Borrow error:", error);
       toast.error("Something went wrong!");
     } finally {
       setLoading(false);
@@ -74,20 +79,23 @@ const BorrowButton = ({ book, user }: BorrowModalProps) => {
 
   return (
     <>
-      {/* Borrow Link Button — opens the daisyUI dialog below */}
-      <button onClick={openModal} className="link link-hover text-sm font-semibold text-emerald-700">
+      <button
+        type="button"
+        onClick={openModal}
+        disabled={book.totalCopies <= 0}
+        className="btn btn-sm rounded-md border-none bg-[#12392f] px-6 text-white hover:bg-[#0d2b24] disabled:bg-slate-300"
+      >
         Borrow This Book
       </button>
 
-      {/* DaisyUI Modal */}
       <dialog ref={modalRef} className="modal">
         <div className="modal-box max-w-sm">
           <h3 className="text-lg font-bold">Borrow This Book</h3>
 
-          {/* Book preview */}
+          {/* Book Preview */}
           <div className="mt-4 flex items-center gap-3 rounded-lg bg-slate-50 p-3">
             {book.photo.trim() ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={book.photo}
                 alt={book.title}
@@ -98,12 +106,18 @@ const BorrowButton = ({ book, user }: BorrowModalProps) => {
                 📖
               </div>
             )}
+
             <div className="min-w-0">
               <p className="truncate text-sm font-bold text-slate-800">
                 {book.title}
               </p>
+
               <p className="text-xs text-slate-500">
-                14 days from the day you confirm.
+                Available copies: {book.totalCopies}
+              </p>
+
+              <p className="text-xs text-slate-500">
+                Return within 14 days.
               </p>
             </div>
           </div>
@@ -113,6 +127,7 @@ const BorrowButton = ({ book, user }: BorrowModalProps) => {
             <label className="label">
               <span className="label-text">User Name</span>
             </label>
+
             <input
               type="text"
               value={user.name}
@@ -126,6 +141,7 @@ const BorrowButton = ({ book, user }: BorrowModalProps) => {
             <label className="label">
               <span className="label-text">User Email</span>
             </label>
+
             <input
               type="email"
               value={user.email}
@@ -148,7 +164,7 @@ const BorrowButton = ({ book, user }: BorrowModalProps) => {
             <button
               type="button"
               onClick={handleBorrow}
-              disabled={loading}
+              disabled={loading || book.totalCopies <= 0}
               className="btn border-none bg-[#12392f] text-white hover:bg-[#0d2b24]"
             >
               {loading ? "Borrowing..." : "Confirm Borrow"}
@@ -156,9 +172,9 @@ const BorrowButton = ({ book, user }: BorrowModalProps) => {
           </div>
         </div>
 
-        {/* Click outside to close */}
+        {/* Click Outside to Close */}
         <form method="dialog" className="modal-backdrop">
-          <button>close</button>
+          <button aria-label="Close modal">close</button>
         </form>
       </dialog>
     </>

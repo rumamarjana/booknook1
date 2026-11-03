@@ -126,7 +126,7 @@ return (
     <div>
         {/* Open Modal Button */}
         <button
-            className="btn btn-sm border border-emerald-600 bg-white text-emerald-700 hover:bg-emerald-700 hover:text-white"
+            className="btn btn-sm h-8 min-w-14 rounded-md border-none bg-emerald-600 px-3 text-xs font-semibold text-white hover:bg-emerald-700"
             onClick={openModal}
         >
             Edit

@@ -43,7 +43,7 @@ const DeletedBooksbuttonPage = ({ book }: { book: Book }) => {
     <>
       <button
         onClick={openModal}
-        className="btn btn-sm btn-error"
+        className="btn btn-sm h-8 min-w-14 rounded-md border-none bg-rose-400 px-3 text-xs font-semibold text-white hover:bg-rose-500"
       >
         Delete
       </button>
