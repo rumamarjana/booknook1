@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ChangeEvent, FormEvent } from "react";
 import { toast } from "react-toastify";
+import { authClient } from "@/app/lib/auth-client";
+
 
 type FormState = {
   title: string;
@@ -92,17 +94,20 @@ export default function AddBookForm() {
   
    
     setSubmitting(true);
+    const { data, error } = await authClient.token()
+      const token = data?.token
     try {
       const res = await fetch("http://localhost:8000/add-book", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({...form,
             totalCopies: copies,}),
       });
-      const data = await res.json();
-      console.log(data);
+      const result = await res.json();
+      console.log(result);
 
       setStatus({
         type: "success",

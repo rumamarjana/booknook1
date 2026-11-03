@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSession } from "../lib/auth-client";
+import { authClient, useSession } from "../lib/auth-client";
 import { toast } from "react-toastify";
 import Image from "next/image";
 import Link from "next/link";
@@ -34,9 +34,13 @@ const MyBorrowsPage = () => {
         const fetchMyBorrows = async () => {
             if (!userEmail) return;
 
+      
+
+
             try {
                 const res = await fetch(
                     `${API_URL}/my-borrows?email=${encodeURIComponent(userEmail)}`,
+                     
                     {
                         cache: "no-store",
                     }
@@ -79,6 +83,15 @@ const MyBorrowsPage = () => {
 const handleReturn = async (id: string) => {
     if (returningId) return;
 
+
+     const { data, error } = await authClient.token();
+
+        if (error || !data?.token) {
+            throw new Error("Authentication token not found!");
+        }
+
+        const token = data.token;
+
     try {
         setReturningId(id);
 
@@ -86,6 +99,9 @@ const handleReturn = async (id: string) => {
             `${API_URL}/borrows/${id}`,
             {
                 method: "DELETE",
+                 headers: {
+                    Authorization: `Bearer ${token}`,
+                },
             }
         );
 

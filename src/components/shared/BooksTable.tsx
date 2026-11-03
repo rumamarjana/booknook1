@@ -99,9 +99,19 @@ function BooksTableSkeleton() {
 
 async function BooksTableContent() {
   let books: Book[] = [];
+   
+    const { data, error } = await authClient.token();
 
+if (error || !data?.token) {
+    throw new Error("Authentication token not found!");
+}
+
+const token = data.token;
   try {
     const res = await fetch("http://localhost:8000/books", {
+       headers: {
+        Authorization: `Bearer ${token}`,
+    },
       cache: "no-store",
     });
     books = (await res.json()) as Book[];
