@@ -21,10 +21,21 @@ const DeletedBooksbuttonPage = ({ book }: { book: Book }) => {
 
   // Delete Book
   const handleDeleteBooks = async () => {
+
+    const { data, error } = await authClient.token();
+
+    if (error || !data?.token) {
+      throw new Error("Authentication token not found!");
+    }
+
+    const token = data.token;
     const res = await fetch(
       `http://localhost:8000/book/${book._id}`,
       {
         method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
     );
 
