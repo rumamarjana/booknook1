@@ -1,6 +1,11 @@
 import React, { Suspense } from "react";
 import Link from "next/link";
+import type { Metadata } from "next";
 import BorrowSection from "@/components/shared/BorrowSection";
+
+export const metadata: Metadata = {
+  title: "BookNook | Book Details",
+};
 
 interface Props {
   params: Promise<{ id: string }>;

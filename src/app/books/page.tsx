@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import BooksGrid, { BooksGridSkeleton } from "@/components/shared/BooksGrid";
 
 export const metadata: Metadata = {
-  title: "All Books | BookNook",
+  title: "BookNook | All Books",
   description: "Browse every book on the BookNook bookshelf.",
 };
 

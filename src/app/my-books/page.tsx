@@ -7,7 +7,7 @@ import BooksTable, {
 } from "@/components/shared/BooksTable";
 
 export const metadata: Metadata = {
-  title: "My Books Management | BookNook",
+  title: "BookNook | My Books",
   description: "Manage every book on the BookNook bookshelf.",
 };
 
