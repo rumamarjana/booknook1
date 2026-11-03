@@ -1,4 +1,7 @@
+"use client";
+import { authClient } from "@/app/lib/auth-client";
 import Image from "next/image";
+import Link  from "next/link";
 
 const links = [
   { label: "Home", href: "/", active: true },
@@ -55,20 +58,28 @@ function LogoutIcon() {
 }
 
 export default function Navbar() {
-  // Flip this to true (once real login/session state exists) to show the
-  // avatar + profile dropdown instead of the Login / Signup links.
-  const isLoggedIn = false;
+        const { data: session, isPending } = authClient.useSession();
+    const user = session?.user;
+    console.log(user)
+
+    const isLoggedIn = !!session?.user;
+
+    if (isPending) {
+        return <p>Loading...</p>;
+    }
+
+
 
   return (
     <header className="relative z-20 bg-white">
       <nav className="navbar mx-auto max-w-7xl px-4">
         <div className="navbar-start">
-          <a href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <BookLogo />
             <span className="font-serif text-2xl font-bold text-slate-900">
               BookNook
             </span>
-          </a>
+          </Link>
         </div>
 
         <div className="navbar-center hidden md:block">

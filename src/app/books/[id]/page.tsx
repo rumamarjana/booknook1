@@ -1,12 +1,9 @@
-
+import React, { Suspense } from "react";
 import Link from "next/link";
-import { Suspense } from "react";
-// import BorrowButton from "@/components/shared/BorrowButton";
+import BorrowSection from "@/components/shared/BorrowSection";
 
 interface Props {
-  params: Promise<{
-    id: string;
-  }>;
+  params: Promise<{ id: string }>;
 }
 
 type Book = {
@@ -27,8 +24,7 @@ async function getBook(id: string): Promise<Book | null> {
       cache: "no-store",
     });
     if (!res.ok) return null;
-    const data = (await res.json()) as Book | null;
-    return data;
+    return (await res.json()) as Book | null;
   } catch {
     return null;
   }
@@ -80,27 +76,40 @@ async function BookDetails({ params }: Props) {
         <div className="aspect-[3/4] w-full overflow-hidden rounded-md bg-slate-100">
           {/* Cover URLs are user-supplied (any host), so the plain img tag is
               intentional here — next/image would reject unlisted hosts. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={book.photo}
-            alt={`Cover of ${title}`}
-            className="h-full w-full object-cover"
-          />
+          {book.photo?.trim() ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={book.photo.trim()}
+              alt={`Cover of ${title}`}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-4xl">
+              📖
+            </div>
+          )}
         </div>
       </div>
 
       {/* Info */}
       <div>
-        {book.category?.trim() && (
+        {/* Category */}
+        {book.category?.trim() ? (
           <span className="badge border-none bg-sky-100 text-sky-700">
             {book.category.trim()}
           </span>
+        ) : (
+          <span className="badge border-none bg-slate-100 text-slate-500">
+            Uncategorized
+          </span>
         )}
 
+        {/* Title */}
         <h1 className="mt-3 font-serif text-3xl font-bold leading-tight text-slate-900">
           {title}
         </h1>
 
+        {/* Author */}
         <p className="mt-1 text-sm font-medium text-slate-500">
           {book.author?.trim() ? `by ${book.author.trim()}` : "Unknown author"}
         </p>
@@ -112,16 +121,21 @@ async function BookDetails({ params }: Props) {
           {totalCopies === 1 ? "copy" : "copies"} available on the shelf
         </p>
 
-        {book.description?.trim() && (
-          <div className="mt-6">
-            <h2 className="text-sm font-bold uppercase tracking-wide text-slate-700">
-              Description
-            </h2>
+        {/* Description */}
+        <div className="mt-6">
+          <h2 className="text-sm font-bold uppercase tracking-wide text-slate-700">
+            Description
+          </h2>
+          {book.description?.trim() ? (
             <p className="mt-2 text-sm leading-relaxed text-slate-600">
               {book.description.trim()}
             </p>
-          </div>
-        )}
+          ) : (
+            <p className="mt-2 text-sm italic text-slate-400">
+              No description was provided for this book.
+            </p>
+          )}
+        </div>
 
         {/* Who added it */}
         <div className="mt-6 flex items-center gap-3 rounded-xl bg-white p-4 shadow-md shadow-slate-200/60">
@@ -144,14 +158,22 @@ async function BookDetails({ params }: Props) {
           </div>
         </div>
 
-        Borrow system
-        {/* <div className="mt-6">
-          <BorrowButton
-            bookId={book._id}
-            bookTitle={title}
-            totalCopies={totalCopies}
+        {/* Borrow This Book */}
+        <div className="mt-8 flex items-center gap-3">
+          <BorrowSection
+            book={{
+              _id: book._id,
+              title: book.title?.trim() || "Untitled Book",
+              photo: book.photo ?? "",
+            }}
+            available={totalCopies > 0}
           />
-        </div> */}
+          {totalCopies <= 0 && (
+            <span className="badge badge-error badge-outline">
+              Not Available
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -176,7 +198,7 @@ function LoadingDetails() {
   );
 }
 
-export default function BookDetailsPage({ params }: Props) {
+const BookDetailsPage = async ({ params }: Props) => {
   return (
     <main className="flex flex-1 flex-col bg-[#fdfbf5] py-10">
       <div className="mx-auto w-full max-w-5xl px-4">
@@ -195,4 +217,6 @@ export default function BookDetailsPage({ params }: Props) {
       </div>
     </main>
   );
-}
+};
+
+export default BookDetailsPage;
