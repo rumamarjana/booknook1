@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "../lib/auth-client";
-// import { toast } from "react-hot-toast";
+import { toast } from "react-toastify";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -51,7 +51,12 @@ const MyBorrowsPage = () => {
                     throw new Error(data.message || "Failed to load borrowed books");
                 }
 
-                setBorrows(data);
+                setBorrows(
+                    data.filter(
+                        (borrow: Borrow) =>
+                            borrow.userEmail?.toLowerCase() === userEmail.toLowerCase()
+                    )
+                );
             } catch (error) {
                 console.error("Fetch Error:", error);
 
@@ -67,58 +72,59 @@ const MyBorrowsPage = () => {
 
         if (userEmail) {
             fetchMyBorrows();
-        } else if (!isPending) {
-            setLoading(false);
         }
     }, [userEmail, isPending]);
 
     // 2. Return book function
-    const handleReturn = async (borrowId: string) => {
-        try {
-            setReturningId(borrowId);
+const handleReturn = async (id: string) => {
+    if (returningId) return;
 
-            const res = await fetch(
-                `${API_URL}/my-borrows/return/${borrowId}`,
-                {
-                    method: "PATCH",
-                }
-            );
+    try {
+        setReturningId(id);
 
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.message || "Failed to return book");
+        const res = await fetch(
+            `${API_URL}/borrows/${id}`,
+            {
+                method: "DELETE",
             }
+        );
 
-            toast.success(data.message || "Book returned successfully!");
+        const data = await res.json();
 
-            // Update UI immediately
-            setBorrows((previousBorrows) =>
-                previousBorrows.map((borrow) =>
-                    borrow._id === borrowId
-                        ? {
-                            ...borrow,
-                            status: "returned",
-                            returnDate: new Date().toISOString(),
-                        }
-                        : borrow
-                )
-            );
-        } catch (error) {
-            console.error("Return Error:", error);
-
-            toast.error(
-                error instanceof Error
-                    ? error.message
-                    : "Failed to return book"
-            );
-        } finally {
-            setReturningId(null);
+        if (!res.ok) {
+            throw new Error(data.message || "Return failed");
         }
-    };
 
+        // Update UI without page reload
+        setBorrows((prev) =>
+            prev.map((item) =>
+                item._id === id
+                    ? {
+                        ...item,
+                        status: "returned",
+                        returnDate: new Date().toISOString(),
+                    }
+                    : item
+            )
+        );
+
+        toast.success("Book returned successfully!");
+
+    } catch (error) {
+        console.error("Return Error:", error);
+
+        toast.error(
+            error instanceof Error
+                ? error.message
+                : "Failed to return book!"
+        );
+
+    } finally {
+        setReturningId(null);
+    }
+};
     // 3. Loading state
-    if (isPending || loading) {
+    if (isPending || (loading && !!userEmail)) {
         return (
             <div className="flex min-h-[60vh] items-center justify-center">
                 <span className="loading loading-spinner loading-lg text-primary"></span>
@@ -200,114 +206,75 @@ const MyBorrowsPage = () => {
                     </div>
                 ) : (
 
-                    /* Books Grid */
-                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-
-                        {borrows.map((borrow) => (
-                            <div
-                                key={borrow._id}
-                                className="overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-md transition hover:shadow-xl"
-                            >
-
-                                {/* Book Image */}
-                                <div className="relative h-56 bg-base-200">
-                                    {borrow.bookImage ? (
-                                        <Image
-                                            src={borrow.bookImage}
-                                            alt={borrow.bookTitle || "Book cover"}
-                                            fill
-                                            unoptimized
-                                            className="object-cover"
-                                            sizes="(max-width: 768px) 100vw, 33vw"
-                                        />
-                                    ) : (
-                                        <div className="flex h-full items-center justify-center">
-                                            No Image
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Book Information */}
-                                <div className="space-y-4 p-5">
-
-                                    <div>
-                                        <h2 className="text-xl font-bold">
-                                            {borrow.bookTitle}
-                                        </h2>
-
-                                        <p className="mt-2 text-sm text-base-content/60">
-                                            Borrower: {borrow.userEmail}
-                                        </p>
-                                    </div>
-
-                                    {/* Dates */}
-                                    <div className="space-y-2 text-sm">
-                                        <p>
-                                            <strong>Borrow Date:</strong>{" "}
+                    <div className="overflow-x-auto rounded-box border border-base-300 bg-base-100 shadow">
+                        <table className="table table-zebra min-w-[640px]">
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Title</th>
+                                    <th>Borrow Date</th>
+                                    <th>Return Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {borrows.map((borrow) => (
+                                    <tr key={borrow._id}>
+                                        <td>
+                                            {borrow.bookImage ? (
+                                                <Image
+                                                    src={borrow.bookImage}
+                                                    alt={borrow.bookTitle || "Book cover"}
+                                                    width={56}
+                                                    height={72}
+                                                    unoptimized
+                                                    className="h-[72px] w-14 rounded object-cover"
+                                                />
+                                            ) : (
+                                                <div className="flex h-[72px] w-14 items-center justify-center rounded bg-base-200 text-xs">
+                                                    No Image
+                                                </div>
+                                            )}
+                                        </td>
+                                        <td className="font-medium">
+                                            {borrow.bookTitle || "Untitled Book"}
+                                        </td>
+                                        <td>
                                             {borrow.borrowDate
                                                 ? new Date(borrow.borrowDate).toLocaleDateString()
                                                 : "N/A"}
-                                        </p>
-
-                                        <p>
-                                            <strong>Due Date:</strong>{" "}
-                                            {borrow.dueDate
-                                                ? new Date(borrow.dueDate).toLocaleDateString()
-                                                : "Not specified"}
-                                        </p>
-
-                                        {borrow.status === "returned" && (
-                                            <p>
-                                                <strong>Return Date:</strong>{" "}
-                                                {borrow.returnDate
-                                                    ? new Date(borrow.returnDate).toLocaleDateString()
-                                                    : "N/A"}
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    {/* Status */}
-                                    <div>
-                                        <span
-                                            className={`badge ${
-                                                borrow.status === "returned"
-                                                    ? "badge-success"
-                                                    : "badge-warning"
-                                            }`}
-                                        >
-                                            {borrow.status === "returned"
-                                                ? "Returned"
-                                                : "Borrowed"}
-                                        </span>
-                                    </div>
-
-                                    {/* Return Button */}
-                                    {borrow.status === "borrowed" ? (
-                                        <button
-                                            onClick={() => handleReturn(borrow._id)}
-                                            disabled={returningId === borrow._id}
-                                            className="btn btn-primary w-full"
-                                        >
-                                            {returningId === borrow._id ? (
-                                                <>
-                                                    <span className="loading loading-spinner loading-sm"></span>
-                                                    Returning...
-                                                </>
+                                        </td>
+                                        <td>
+                                            {borrow.returnDate
+                                                ? new Date(borrow.returnDate).toLocaleDateString()
+                                                : "Not Returned"}
+                                        </td>
+                                        <td>
+                                            {borrow.status === "borrowed" ? (
+                                                <button
+                                                    onClick={() => handleReturn(borrow._id)}
+                                                    disabled={returningId === borrow._id}
+                                                    className="btn btn-primary btn-sm"
+                                                >
+                                                    {returningId === borrow._id ? (
+                                                        <>
+                                                            <span className="loading loading-spinner loading-sm"></span>
+                                                            Returning...
+                                                        </>
+                                                    ) : (
+                                                        "Return Book"
+                                                    )}
+                                                </button>
                                             ) : (
-                                                "Return Book"
+                                                <span className="badge badge-success">
+                                                    Returned
+                                                </span>
                                             )}
-                                        </button>
-                                    ) : (
-                                        <button
-                                            disabled
-                                            className="btn btn-success w-full"
-                                        >
-                                            ✓ Returned
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 )}
             </div>
