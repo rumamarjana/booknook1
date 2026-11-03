@@ -2,6 +2,8 @@ import React, { Suspense } from "react";
 import Link from "next/link";
 import type { Metadata } from "next";
 import BorrowSection from "@/components/shared/BorrowSection";
+import { auth } from "@/app/lib/auth";
+import { headers } from "next/headers";
 
 export const metadata: Metadata = {
   title: "BookNook | Book Details",
@@ -24,15 +26,26 @@ type Book = {
 };
 
 async function getBook(id: string): Promise<Book | null> {
-  try {
-    const res = await fetch(`http://localhost:8000/books/${id}`, {
-       headers:{
-        authorization:'user logged in'
-       }
+   try {
+    const jwtToken = await auth.api.getToken({
+      headers: await headers(),
     });
+
+  const token =jwtToken?.token
+  console.log(token)
+
+    const res = await fetch(`http://localhost:8000/books/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      cache: "no-store",
+    });
+
     if (!res.ok) return null;
-    return (await res.json()) as Book | null;
-  } catch {
+
+    return (await res.json()) as Book;
+  } catch (error) {
+    console.error("Get Book Error:", error);
     return null;
   }
 }
