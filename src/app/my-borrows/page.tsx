@@ -18,7 +18,7 @@ interface Borrow {
     status: "borrowed" | "returned";
 }
 
-const API_URL = "http://localhost:8000";
+const API_URL = `${process.env.NEXT_PUBLIC_API_URL}`;
 
 const MyBorrowsPage = () => {
     const { data: session, isPending } = useSession();

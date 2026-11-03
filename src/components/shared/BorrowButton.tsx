@@ -47,7 +47,7 @@ const BorrowButton = ({ book, user }: BorrowModalProps) => {
     try {
       setLoading(true);
 
-      const response = await fetch("http://localhost:8000/borrows", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/borrows`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

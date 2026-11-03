@@ -97,7 +97,7 @@ export default function AddBookForm() {
     const { data, error } = await authClient.token()
       const token = data?.token
     try {
-      const res = await fetch("http://localhost:8000/add-book", {
+      const res = await fetch("${process.env.NEXT_PUBLIC_API_URL}/add-book", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

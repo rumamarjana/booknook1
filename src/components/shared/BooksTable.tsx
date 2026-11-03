@@ -103,7 +103,7 @@ async function BooksTableContent() {
    
    
   try {
-    const res = await fetch("http://localhost:8000/books", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/books`, {
       
       cache: "no-store",
     });
@@ -116,7 +116,7 @@ async function BooksTableContent() {
       >
         <span>
           Could not load the books. Make sure the book server is running on
-          http://localhost:8000 and try again.
+          ${process.env.NEXT_PUBLIC_API_URL} and try again.
         </span>
       </div>
     );

@@ -113,7 +113,7 @@ export default function EditButtonPage({ book }: { book: Book }) {
         
         
         const res = await fetch(
-            `http://localhost:8000/books/${book._id}`,
+            `${process.env.NEXT_PUBLIC_API_URL}/books/${book._id}`,
             {
                 method: "PATCH",
                 headers: {

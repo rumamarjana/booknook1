@@ -30,7 +30,7 @@ const DeletedBooksbuttonPage = ({ book }: { book: Book }) => {
 
     const token = data.token;
     const res = await fetch(
-      `http://localhost:8000/book/${book._id}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/book/${book._id}`,
       {
         method: "DELETE",
         headers: {

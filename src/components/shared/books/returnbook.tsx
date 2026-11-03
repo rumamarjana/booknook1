@@ -3,7 +3,7 @@ import React from 'react';
 const returnbook = () => {
     const handleReturn = async (id) => {
         const res = await fetch(
-            `http://localhost:8000/my-borrows/return/${id}`,
+            `${process.env.NEXT_PUBLIC_API_URL}/my-borrows/return/${id}`,
             {
                 method: "PATCH",
             }
