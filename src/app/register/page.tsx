@@ -4,21 +4,53 @@
  import { redirect } from "next/navigation"
  import { authClient } from "../lib/auth-client";
 import Link from "next/link";
+ import { useState } from "react";
 
 
+ const getPasswordErrors = (password: string): string[] => {
+     const errors: string[] = [];
 
+     if (!/[A-Z]/.test(password)) {
+         errors.push("Password must contain at least one uppercase letter (A-Z).");
+     }
 
+     if (!/[a-z]/.test(password)) {
+         errors.push("Password must contain at least one lowercase letter (a-z).");
+     }
 
+     if (password.length < 6) {
+         errors.push("Password must be at least 6 characters long.");
+     }
 
-const RegisterPage = () => {
+     return errors;
+ };
 
+ const RegisterPage = () => {
+     const [password, setPassword] = useState("");
+     const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+
+     const handleGoogleLogin = async () => {
+    const { data, error } = await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/",
+    });
+
+    if (error) {
+        console.log("Google Login Error:", error);
+    }
+};
     const handleregister = async(e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
 
-
-         const formData = new FormData(e.currentTarget)
+     const formData = new FormData(e.currentTarget)
         const user = Object.fromEntries(formData.entries()) as {name:string, image: string, email:string, password:string}
+        const errors = getPasswordErrors(user.password);
+
+        setPasswordErrors(errors);
+        if (errors.length > 0) {
+            return;
+        }
 
              const {data, error} = await authClient.signUp.email({
              name: user.name,
@@ -87,10 +119,21 @@ const RegisterPage = () => {
                         <legend className="fieldset-legend">Password</legend>
                         <input
                             type="password"
-                             name="password"
+                            name="password"
+                            value={password}
+                            onChange={(event) => {
+                                const nextPassword = event.target.value;
+                                setPassword(nextPassword);
+                                setPasswordErrors(getPasswordErrors(nextPassword));
+                            }}
                             className="input input-bordered w-full"
                             placeholder="Enter your password"
                         />
+                        {passwordErrors.map((error) => (
+                            <p key={error} className="text-error text-sm">
+                                {error}
+                            </p>
+                        ))}
                     </fieldset>
 
                     <button
@@ -103,6 +146,7 @@ const RegisterPage = () => {
 
                     <button
                         type="button"
+                        onClick={handleGoogleLogin}
                         className="btn btn-outline w-full"
                     >
                         <svg
@@ -141,6 +185,4 @@ const RegisterPage = () => {
 };
 
 export default RegisterPage;
-
-
 

@@ -98,7 +98,7 @@ export default function EditButtonPage({ book }: { book: Book }) {
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const data = {
+        const data1 = {
             ...form,
             totalCopies: Number(form.totalCopies),
         };
