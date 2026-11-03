@@ -26,7 +26,9 @@ type Book = {
 async function getBook(id: string): Promise<Book | null> {
   try {
     const res = await fetch(`http://localhost:8000/books/${id}`, {
-      cache: "no-store",
+       headers:{
+        authorization:'user logged in'
+       }
     });
     if (!res.ok) return null;
     return (await res.json()) as Book | null;
