@@ -44,7 +44,7 @@ const MyBorrowsPage = () => {
                 }
 
                 const res = await fetch(
-                    `${API_URL}/my-borrows?email=${encodeURIComponent(userEmail)}`,
+                    `${API_URL}/my-borrows`,
                     {
                         cache: "no-store",
                         headers: {
