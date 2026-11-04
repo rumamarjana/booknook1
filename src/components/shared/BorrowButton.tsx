@@ -35,59 +35,67 @@ const BorrowButton = ({ book, user }: BorrowModalProps) => {
     modalRef.current?.showModal();
   };
 
-  const handleBorrow = async () => {
+const handleBorrow = async () => {
     if (loading) return;
 
     const borrowData = {
-      bookId: book._id,
-      bookTitle: book.title,
-      bookImage: book.photo,
-      userName: user.name,
-      userEmail: user.email,
+        bookId: book._id,
+        bookTitle: book.title,
+        bookImage: book.photo,
+        userName: user.name,
+        userEmail: user.email,
     };
 
     try {
-      setLoading(true);
+        setLoading(true);
 
-      const { data, error } = await authClient.token();
+        // Get JWT Token
+        const { data: tokenData, error } = await authClient.token();
 
-      if (error || !data?.token) {
-        throw new Error("Authentication token not found!");
-      }
+        if (error || !tokenData?.token) {
+            throw new Error("Authentication token not found!");
+        }
 
-      const token = data.token;
+        // Send Borrow Request
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/borrows`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${tokenData.token}`,
+                },
+                body: JSON.stringify(borrowData),
+            }
+        );
 
+        const result = await response.json();
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/borrows`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(borrowData),
-      });
+        if (!response.ok) {
+            throw new Error(result.message || "Borrow failed!");
+        }
 
-      const data = await response.json();
+        modalRef.current?.close();
 
-      if (!response.ok) {
-        toast.error(data.message || "Borrow failed!");
-        return;
-      }
+        toast.success(
+            `"${book.title}" has been borrowed successfully! 📚`
+        );
 
-      modalRef.current?.close();
+        router.refresh();
 
-      toast.success(
-        `"${book.title}" has been borrowed successfully! 📚`
-      );
-
-      router.refresh();
     } catch (error) {
-      console.error("Borrow error:", error);
-      toast.error("Something went wrong!");
+        console.error("Borrow error:", error);
+
+        toast.error(
+            error instanceof Error
+                ? error.message
+                : "Something went wrong!"
+        );
+
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
 
   return (
     <>
