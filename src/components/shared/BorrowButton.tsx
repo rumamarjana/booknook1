@@ -3,6 +3,7 @@
 import React, { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+// import { authClient } from "@/app/lib/auth-client";
 
 type Book = {
   _id: string;
@@ -47,10 +48,20 @@ const BorrowButton = ({ book, user }: BorrowModalProps) => {
     try {
       setLoading(true);
 
+      const { data, error } = await authClient.token();
+
+      if (error || !data?.token) {
+        throw new Error("Authentication token not found!");
+      }
+
+      const token = data.token;
+
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/borrows`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(borrowData),
       });
