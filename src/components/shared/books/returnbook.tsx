@@ -11,33 +11,58 @@ type ReturnBookProps = {
 const ReturnBook = ({ id }: ReturnBookProps) => {
   const router = useRouter();
 
-  const handleReturn = async () => {
+ const handleReturn = async (id: string) => {
+    if (returningId) return;
+
     try {
-      const session = await authClient.getSession();
+        setReturningId(id);
 
-      const token = session.data?.session?.token;
+        const { data, error } = await authClient.token();
 
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/borrows/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        if (error || !data?.token) {
+            throw new Error("Authentication token not found!");
         }
-      );
 
-      if (res.ok) {
+        const res = await fetch(`${API_URL}/borrows/${id}`, {
+            method: "DELETE",
+            headers: {
+                Authorization: `Bearer ${data.token}`,
+            },
+        });
+
+        const result = await res.json();
+
+        if (!res.ok) {
+            throw new Error(result.message || "Return failed");
+        }
+
+        setBorrows((prev) =>
+            prev.map((item) =>
+                item._id === id
+                    ? {
+                          ...item,
+                          status: "returned",
+                          returnDate: new Date().toISOString(),
+                      }
+                    : item
+            )
+        );
+
         toast.success("Book returned successfully!");
-        router.refresh();
-      } else {
-        toast.error("Failed to return book!");
-      }
+
     } catch (error) {
-      console.error(error);
-      toast.error("Something went wrong!");
+        console.error("Return Error:", error);
+
+        toast.error(
+            error instanceof Error
+                ? error.message
+                : "Failed to return book!"
+        );
+
+    } finally {
+        setReturningId(null);
     }
-  };
+};
 
   return (
     <button onClick={handleReturn}>

@@ -34,15 +34,22 @@ const MyBorrowsPage = () => {
         const fetchMyBorrows = async () => {
             if (!userEmail) return;
 
-      
 
 
             try {
+                const { data: tokenData, error } = await authClient.token();
+
+                if (error || !tokenData?.token) {
+                    throw new Error("Authentication token not found!");
+                }
+
                 const res = await fetch(
                     `${API_URL}/my-borrows?email=${encodeURIComponent(userEmail)}`,
-                     
                     {
                         cache: "no-store",
+                        headers: {
+                            Authorization: `Bearer ${tokenData.token}`,
+                        },
                     }
                 );
 
@@ -56,11 +63,15 @@ const MyBorrowsPage = () => {
                 }
 
                 setBorrows(
-                    data.filter(
-                        (borrow: Borrow) =>
-                            borrow.userEmail?.toLowerCase() === userEmail.toLowerCase()
-                    )
+                    Array.isArray(data)
+                        ? data.filter(
+                            (borrow: Borrow) =>
+                                borrow.userEmail?.toLowerCase() ===
+                                userEmail.toLowerCase()
+                        )
+                        : []
                 );
+
             } catch (error) {
                 console.error("Fetch Error:", error);
 
@@ -80,11 +91,11 @@ const MyBorrowsPage = () => {
     }, [userEmail, isPending]);
 
     // 2. Return book function
-const handleReturn = async (id: string) => {
-    if (returningId) return;
+    const handleReturn = async (id: string) => {
+        if (returningId) return;
 
 
-     const { data, error } = await authClient.token();
+        const { data, error } = await authClient.token();
 
         if (error || !data?.token) {
             throw new Error("Authentication token not found!");
@@ -92,53 +103,53 @@ const handleReturn = async (id: string) => {
 
         const token = data.token;
 
-    try {
-        setReturningId(id);
+        try {
+            setReturningId(id);
 
-        const res = await fetch(
-            `${API_URL}/borrows/${id}`,
-            {
-                method: "DELETE",
-                 headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+            const res = await fetch(
+                `${API_URL}/borrows/${id}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message || "Return failed");
             }
-        );
 
-        const data = await res.json();
+            // Update UI without page reload
+            setBorrows((prev) =>
+                prev.map((item) =>
+                    item._id === id
+                        ? {
+                            ...item,
+                            status: "returned",
+                            returnDate: new Date().toISOString(),
+                        }
+                        : item
+                )
+            );
 
-        if (!res.ok) {
-            throw new Error(data.message || "Return failed");
+            toast.success("Book returned successfully!");
+
+        } catch (error) {
+            console.error("Return Error:", error);
+
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : "Failed to return book!"
+            );
+
+        } finally {
+            setReturningId(null);
         }
-
-        // Update UI without page reload
-        setBorrows((prev) =>
-            prev.map((item) =>
-                item._id === id
-                    ? {
-                        ...item,
-                        status: "returned",
-                        returnDate: new Date().toISOString(),
-                    }
-                    : item
-            )
-        );
-
-        toast.success("Book returned successfully!");
-
-    } catch (error) {
-        console.error("Return Error:", error);
-
-        toast.error(
-            error instanceof Error
-                ? error.message
-                : "Failed to return book!"
-        );
-
-    } finally {
-        setReturningId(null);
-    }
-};
+    };
     // 3. Loading state
     if (isPending || (loading && !!userEmail)) {
         return (
