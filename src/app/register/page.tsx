@@ -1,50 +1,51 @@
 "use client";
 
 
- import { redirect } from "next/navigation"
- import { authClient } from "../lib/auth-client";
+import { useRouter } from "next/navigation";
+import { authClient } from "../lib/auth-client";
 import Link from "next/link";
- import { useState } from "react";
+import { useState } from "react";
 
 
- const getPasswordErrors = (password: string): string[] => {
-     const errors: string[] = [];
+const getPasswordErrors = (password: string): string[] => {
+    const errors: string[] = [];
 
-     if (!/[A-Z]/.test(password)) {
-         errors.push("Password must contain at least one uppercase letter (A-Z).");
-     }
-
-     if (!/[a-z]/.test(password)) {
-         errors.push("Password must contain at least one lowercase letter (a-z).");
-     }
-
-     if (password.length < 6) {
-         errors.push("Password must be at least 6 characters long.");
-     }
-
-     return errors;
- };
-
- const RegisterPage = () => {
-     const [password, setPassword] = useState("");
-     const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
-
-     const handleGoogleLogin = async () => {
-    const { data, error } = await authClient.signIn.social({
-        provider: "google",
-        callbackURL: "/",
-    });
-
-    if (error) {
-        console.log("Google Login Error:", error);
+    if (!/[A-Z]/.test(password)) {
+        errors.push("Password must contain at least one uppercase letter (A-Z).");
     }
+
+    if (!/[a-z]/.test(password)) {
+        errors.push("Password must contain at least one lowercase letter (a-z).");
+    }
+
+    if (password.length < 6) {
+        errors.push("Password must be at least 6 characters long.");
+    }
+
+    return errors;
 };
-    const handleregister = async(e: React.FormEvent<HTMLFormElement>) => {
+
+const RegisterPage = () => {
+    const router = useRouter();
+    const [password, setPassword] = useState("");
+    const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+
+    const handleGoogleLogin = async () => {
+        const { data, error } = await authClient.signIn.social({
+            provider: "google",
+            callbackURL: "/",
+        });
+
+        if (error) {
+            console.log("Google Login Error:", error);
+        }
+    };
+    const handleregister = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
 
-     const formData = new FormData(e.currentTarget)
-        const user = Object.fromEntries(formData.entries()) as {name:string, image: string, email:string, password:string}
+        const formData = new FormData(e.currentTarget)
+        const user = Object.fromEntries(formData.entries()) as { name: string, image: string, email: string, password: string }
         const errors = getPasswordErrors(user.password);
 
         setPasswordErrors(errors);
@@ -52,18 +53,18 @@ import Link from "next/link";
             return;
         }
 
-             const {data, error} = await authClient.signUp.email({
-             name: user.name,
-             email: user.email,
-             password: user.password,
+        const { data, error } = await authClient.signUp.email({
+            name: user.name,
+            email: user.email,
+            password: user.password,
             image: user.image,
         })
 
-        if(data) {
-            redirect('/')
+        if (data) {
+            router.push("/");
+            router.refresh();
         }
-
-        if(error) {
+        if (error) {
             console.log(error)
         }
 
@@ -176,7 +177,7 @@ import Link from "next/link";
                     </button>
                     <p className="text-center text-sm mt-3">
                         Already have an account?{" "}
-                       <Link href="/login"className="link link-primary">Login</Link>
+                        <Link href="/login" className="link link-primary">Login</Link>
                     </p>
                 </div>
             </form>

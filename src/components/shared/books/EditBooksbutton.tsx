@@ -90,7 +90,7 @@ export default function EditButtonPage({ book }: { book: Book }) {
 
 
 
-        fetch(`http://localhost:8000/books/${book._id}`)
+        fetch(`{process.env.NEXT_PUBLIC_API_URL}/${book._id}`)
             .then((res) => res.json())
             .then((data: Book) => setForm(toFormState(data)))
             .catch(() => setForm(toFormState(book))) // fall back to the row data
